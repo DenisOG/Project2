@@ -42,7 +42,7 @@ export const  useRoutes = isAuthenticated => {
                 <Route path="/progress" exact>
                     <ProgressPage />
                 </Route>
-                <Redirect to="/direction" />
+                <Redirect to="/progress" />
             </Switch>
         )
     }

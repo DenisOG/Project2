@@ -9,6 +9,7 @@ import {TextField} from "@material-ui/core"
 import {useHttp} from "../hooks/http.hooks"
 import Autocomplete from "@material-ui/lab/Autocomplete";
 
+
 const useStyles = makeStyles((theme) => ({
     root: {
 
@@ -305,9 +306,11 @@ export default function StudentPage() {
                                     <tbody>
                                     </tbody>
                                 </table>
+
                             </Paper>
                         </Grid>
                     </Grid>
+
                 </Container>
             </main>
         </div>

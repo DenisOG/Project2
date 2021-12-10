@@ -12,6 +12,7 @@ router.get("/all", function(req, res){
 router.post("/add", async function (req, res) {
     const {name} = req.body
     const {headman} = req.body
+    const {headman2} = req.body
     const candidate = await Group.findOne({name})
     if (candidate){
         return res.status(400).json({message: "Такая группа уже есть"})
@@ -50,7 +51,7 @@ router.get("/:id", function(req, res){
 router.put("/edit", async function(req, res){
     const id = req.body.id
     const candidate = await Group.findOneAndUpdate({_id: id},
-        {name: req.body.name,headman: req.body.headman})
+        {name: req.body.name,headman: req.body.headman,headman2: req.body.headman2})
     candidate.save()
     console.log(candidate)
     return res.send(candidate);

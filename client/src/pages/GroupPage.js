@@ -34,6 +34,13 @@ const useStyles = makeStyles((theme) => ({
         width: 300,
         fontFamily: 'Noto Sans JP,cursive'
     },
+    text3:{
+        position:"absolute",
+        marginTop: 280,
+        marginLeft: 700,
+        width: 300,
+        fontFamily: 'Noto Sans JP,cursive'
+    },
     container: {
         marginTop: 10,
         fontFamily: 'Noto Sans JP,cursive'
@@ -57,6 +64,9 @@ const useStyles = makeStyles((theme) => ({
         marginTop: 150,
         marginLeft: 700,
         fontFamily: 'Noto Sans JP,cursive'
+    },
+    tr:{
+        borderRadius:3
     }
 }));
 
@@ -80,6 +90,7 @@ export default function GroupPage() {
             const form = document.forms["disForm"];
             const name = form.elements["name"].value;
             const headman = form.elements["headman"].value;
+            //const headman2 = form.elements["headman2"].value;
             EditUser(id_edit, name, headman)
             id_edit = ''
         } else {
@@ -115,7 +126,9 @@ export default function GroupPage() {
         if (response.ok === true) {
             const dis = await response.json()
             setForm({...form, id: dis._id, name: dis.name,
-                headman:dis.headman})
+                headman:dis.headman,
+                //headman2:dis.headman2
+            })
             id_edit = dis._id;
         }
     }
@@ -130,14 +143,15 @@ export default function GroupPage() {
         }
     }
 
-    async function EditUser(disId, disName, disHeadman) {
+    async function EditUser(disId, disName, disHeadman,disHeadman2) {
         const response = await fetch("api/group/edit", {
             method: "PUT",
             headers: {"Accept": "application/json", "Content-Type": "application/json"},
             body: JSON.stringify({
                 id: disId,
                 name: disName,
-                headman: disHeadman
+                headman: disHeadman,
+                //headman2: disHeadman2
             })
         });
         if (response.ok === true) {
@@ -166,6 +180,11 @@ export default function GroupPage() {
         headmanTd.setAttribute("style", "padding:5px; text-align: center");
         headmanTd.append(dis.headman);
         tr.append(headmanTd);
+
+        // const headman2Td = document.createElement("td");
+        // headman2Td.setAttribute("style", "padding:5px; text-align: center");
+        // headman2Td.append(dis.headman2);
+        // tr.append(headman2Td);
 
         const linksTd = document.createElement("td");
         linksTd.setAttribute("style", "cursor:pointer;margin:10px;");
@@ -221,6 +240,17 @@ export default function GroupPage() {
                            size="small"
                            margin="normal"
                 />
+                {/*<TextField className={classes.text3}*/}
+                {/*           id="headman2"*/}
+                {/*           label="Староста"*/}
+                {/*           onChange={changeHandler}*/}
+                {/*           value={form.headman2}*/}
+                {/*           name="headman2"*/}
+                {/*           multiline*/}
+                {/*           variant="standard"*/}
+                {/*           size="small"*/}
+                {/*           margin="normal"*/}
+                {/*/>*/}
                 <Button className={classes.button}
                         type="button"
                         variant="contained"

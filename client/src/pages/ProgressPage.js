@@ -8,6 +8,7 @@ import Button from "@material-ui/core/Button"
 import {TextField} from "@material-ui/core"
 import {useHttp} from "../hooks/http.hooks"
 import Autocomplete from "@material-ui/lab/Autocomplete";
+import ReactHTMLTableToExcel from "react-html-table-to-excel";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -30,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
         fontFamily: 'Noto Sans JP,cursive'
     },
     container: {
-        marginTop: -150,
+        marginTop: -130,
         fontFamily: 'Noto Sans JP,cursive'
     },
     paper: {
@@ -56,6 +57,13 @@ const useStyles = makeStyles((theme) => ({
         marginLeft: 700,
         width: 300,
         fontFamily: 'Noto Sans JP,cursive'
+    },
+    excel:{
+        backgroundColor: '#7FFF00',
+        borderRadius:5,
+        marginLeft:360,
+        marginTop:10,
+        padding:7
     }
 }));
 
@@ -85,10 +93,57 @@ export default function StudentPage() {
             id_edit = ''
         } else {
             try {
-                const data = await request('/api/student/add', 'POST', {...form})
-                if (data.ok === true) {
-                    const dis = await data.name
-                    document.querySelector("tbody").append(row(dis));
+                const response = await fetch("/api/laboratorywork/all")
+                let count = 0
+                if (response.ok === true) {
+                    const dis = await response.json()
+                    if (document.querySelector("tr")) {
+                        document.querySelector("tr").remove()
+                    }
+                    const tr = document.createElement("tr");
+                    const groupTd = document.createElement("th");
+                    groupTd.innerHTML = ""
+                    tr.appendChild(groupTd);
+                    dis.forEach(fio => {
+                        if(form.discipline !== undefined)
+                            if(fio.discipline[0].name === form.discipline["name"])
+                            {
+                                const groupTd = document.createElement("th");
+                                groupTd.innerHTML = "Лаб " + fio.name
+                                tr.appendChild(groupTd);
+                                count++
+                                console.log(fio.name)
+                            }
+                           })
+                    for (let i = 0; i < stud.length; i++)
+                    {
+                        if (document.querySelector("tr")) {
+                            document.querySelector("tr").remove()
+                        }
+                    }
+                    for (let i = 0; i < stud.length; i++)
+                    {
+                        const tbody = document.getElementsByTagName('tbody')[0]
+                        const trbody = document.createElement("tr");
+                        const groupTd = document.createElement("td");
+                        groupTd.innerHTML = stud[i]
+                        trbody.append(groupTd);
+                        for (let i = 0; i < count; i++)
+                        {
+                            const text = document.createElement("td");
+                            text.contentEditable = "true"
+                            text.innerHTML = "0"
+                            trbody.append(text);
+                        }
+
+
+                        tbody.appendChild(trbody)
+                    }
+                    const thead = document.getElementsByTagName('thead')[0]
+
+                    thead.appendChild(tr)
+
+
                 }
             } catch (e) {
 
@@ -108,7 +163,7 @@ export default function StudentPage() {
         }
     }
 
-    getMark()
+    // getMark()
 
     async function getID(id) {
         id_edit = ''
@@ -150,17 +205,6 @@ export default function StudentPage() {
         }
     }
 
-    const zap = []
-    async function Dis () {
-        const response = await fetch("/api/group/all")
-        if (response.ok === true) {
-            const dis = await response.json()
-            dis.forEach(house => {
-                zap.push({id:house._id, name: house.name})
-            })
-        }
-    }
-
     const zap2 = []
     async function Dis2 () {
         const response = await fetch("/api/discipline/all")
@@ -172,7 +216,37 @@ export default function StudentPage() {
         }
     }
 
+    const zap = []
+    async function Dis () {
+        const response = await fetch("/api/discipline/all")
+        if (response.ok === true) {
+            const dis = await response.json()
+            dis.forEach(house => {
 
+                if(form.discipline !== undefined)
+                    if(house.name === form.discipline["name"])
+                        zap.push({id:house.group[0].id, name: house.group[0].name})
+            })
+        }
+    }
+
+
+    StudFind()
+    const stud = []
+    async function StudFind () {
+        const response = await fetch("/api/student/all")
+        if (response.ok === true) {
+            const dis = await response.json()
+            dis.forEach(house => {
+                if(house.gruopp[0].name === form.gruopp["name"])
+                {
+                    stud.push(house.name)
+                }
+
+            })
+        }
+    }
+    // StudFind()
     function row(dis) {
 
         if (document.querySelector("tr[data-rowid='" + dis._id + "']")) {
@@ -183,11 +257,6 @@ export default function StudentPage() {
         const tr = document.createElement("tr");
         tr.setAttribute("style", "padding:10px;");
         tr.setAttribute("data-rowid", dis._id);
-
-        // const nameTd = document.createElement("td");
-        // nameTd.setAttribute("style", "padding:5px; text-align: center");
-        // nameTd.append(dis.name);
-        // tr.append(nameTd);
 
         const groupTd = document.createElement("td");
         groupTd.setAttribute("style", "padding:5px; text-align: center");
@@ -269,35 +338,38 @@ export default function StudentPage() {
                         variant="contained"
                         onClick={addHandler}
                         color="primary"
-                        disabled={form.name === ""}
+                        disabled={form.discipline === "" || form.gruopp === ""}
                 >
                     Показать
                 </Button>
             </form>
 
-            {/*<CssBaseline/>*/}
-            {/*<main>*/}
-            {/*    <Container maxWidth="lg" className={classes.container}>*/}
-            {/*        <Grid container spacing={2}>*/}
-            {/*            <Grid item xs={6}>*/}
-            {/*                <Paper className={classes.paper}>*/}
-            {/*                    <table>*/}
-            {/*                        <thead>*/}
-            {/*                        <tr>*/}
-            {/*                            <th className={classes.zag}>ФИО</th>*/}
-            {/*                            <th className={classes.zag}>Группа</th>*/}
-            {/*                            <th className={classes.zag}>Направление</th>*/}
-            {/*                            <th></th>*/}
-            {/*                        </tr>*/}
-            {/*                        </thead>*/}
-            {/*                        <tbody>*/}
-            {/*                        </tbody>*/}
-            {/*                    </table>*/}
-            {/*                </Paper>*/}
-            {/*            </Grid>*/}
-            {/*        </Grid>*/}
-            {/*    </Container>*/}
-            {/*</main>*/}
+            <CssBaseline/>
+            <main>
+                <Container maxWidth="lg" className={classes.container}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                            <Paper className={classes.paper}>
+                                <table id="excel">
+                                    <thead>
+
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+
+                            </Paper>
+                        </Grid>
+                    </Grid>
+                </Container>
+
+            </main>
+            <ReactHTMLTableToExcel className={classes.excel}
+                                   table="excel"
+                                   filename="excel"
+                                   sheet="Sheet"
+                                   buttonText="Экспорт Excel"
+            />
         </div>
     );
 }

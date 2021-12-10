@@ -7,6 +7,7 @@ import Paper from '@material-ui/core/Paper'
 import Button from "@material-ui/core/Button"
 import {TextField} from "@material-ui/core"
 import {useHttp} from "../hooks/http.hooks"
+import Autocomplete from "@material-ui/lab/Autocomplete";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -17,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
         position:"absolute",
         margin: 10,
         width: 120,
-        marginTop: 100,
+        marginTop: 200,
         marginLeft: 500,
         fontFamily: 'Noto Sans JP,cursive'
     },
@@ -45,6 +46,13 @@ const useStyles = makeStyles((theme) => ({
     zag:{
         textAlign:"center",
         fontFamily: 'Noto Sans JP,cursive'
+    },
+    select:{
+        position:'absolute',
+        marginTop:80,
+        marginLeft: 500,
+        width: 300,
+        fontFamily: 'Noto Sans JP,cursive'
     }
 }));
 
@@ -57,7 +65,7 @@ export default function DisciplinePage() {
     const classes = useStyles();
     const {request} = useHttp()
     const [form, setForm] = useState({
-        id: '', name: ''
+        id: '', name: '',idGroup: '',group:''
     })
     const changeHandler = event => {
 
@@ -68,7 +76,8 @@ export default function DisciplinePage() {
         if (id_edit !== '') {
             const form = document.forms["disForm"];
             const name = form.elements["name"].value;
-            EditUser(id_edit, name)
+            const group = form.elements["group"].value;
+            EditUser(id_edit, name,group)
             id_edit = ''
         } else {
             try {
@@ -102,7 +111,9 @@ export default function DisciplinePage() {
         const response = await fetch("/api/discipline/" + id);
         if (response.ok === true) {
             const dis = await response.json()
-            setForm({...form, id: dis._id, name: dis.name})
+            setForm({...form, id: dis._id, name: dis.name,
+                idGroup: dis.group[0]._id,
+                group:dis.group[0].name})
             id_edit = dis._id;
         }
     }
@@ -117,13 +128,25 @@ export default function DisciplinePage() {
         }
     }
 
-    async function EditUser(disId, disName) {
+    const zap = []
+    async function Dis () {
+        const response = await fetch("/api/group/all")
+        if (response.ok === true) {
+            const dis = await response.json()
+            dis.forEach(house => {
+                zap.push({id:house._id, name: house.name})
+            })
+        }
+    }
+
+    async function EditUser(disId, disName,disGroup) {
         const response = await fetch("api/discipline/edit", {
             method: "PUT",
             headers: {"Accept": "application/json", "Content-Type": "application/json"},
             body: JSON.stringify({
                 id: disId,
                 name: disName,
+                group: [form.idGroup, disGroup]
             })
         });
         if (response.ok === true) {
@@ -134,7 +157,7 @@ export default function DisciplinePage() {
     }
 
     function row(dis) {
-
+        console.log(dis)
         if (document.querySelector("tr[data-rowid='" + dis._id + "']")) {
             document.querySelector("tr[data-rowid='" + dis._id + "']").remove()
         }
@@ -147,6 +170,12 @@ export default function DisciplinePage() {
         nameTd.setAttribute("style", "padding:5px; text-align: center");
         nameTd.append(dis.name);
         tr.append(nameTd);
+
+        const groupTd = document.createElement("td");
+        groupTd.setAttribute("style", "padding:5px; text-align: center");
+        //console.log(dis.group[0].name);
+        groupTd.append(dis.group[0].name);
+        tr.append(groupTd);
 
         const linksTd = document.createElement("td");
         linksTd.setAttribute("style", "cursor:pointer;margin:10px;");
@@ -192,6 +221,25 @@ export default function DisciplinePage() {
                            size="small"
                            margin="normal"
                 />
+
+                <Autocomplete className={classes.select}
+                              id="group"
+                              renderInput={(params) =>
+                                  <TextField {...params} label="Группа" variant="standard" />}
+                              onClick={Dis()}
+                              options={zap}
+                              onChange={(event, value) =>
+                                  setForm({ ...form, idGroup: value.id,  group: value})}
+                              autoComplete="group"
+                              getOptionLabel={(option) => {
+                                  if (option.hasOwnProperty('name')) {
+                                      return option.name;
+                                  }
+                                  return option;
+                              }}
+                              value={form.group}
+                />
+
                 <Button className={classes.button}
                         type="button"
                         variant="contained"
@@ -213,6 +261,7 @@ export default function DisciplinePage() {
                                     <thead>
                                     <tr>
                                         <th className={classes.zag}>Дисциплина</th>
+                                        <th className={classes.zag}>Группа</th>
                                         <th></th>
                                     </tr>
                                     </thead>
